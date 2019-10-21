@@ -54,7 +54,7 @@ def login(request):
                 data["error"] = "Email / password invalid"
 
     except Exception as e:
-        data["error"] = "User not found {}".format(str(e))
+        data["error"] = "User not found {} {}".format(str(e), post_data)
     return Response(data)
 
 
