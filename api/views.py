@@ -23,10 +23,10 @@ def test_jwt(request):
     try:
         post_data = request.data
         jwt_decoded = jwt.decode(
-            json.dumps(post_data), settings.SECRET_KEY, algorithms=['HS256'])
+            post_data, settings.SECRET_KEY, algorithms=['HS256'])
         data["data"] = jwt_decoded
     except Exception as e:
-        data["error"] = str(e)
+        data["error"] = str(e) + jwt_decoded
 
     return Response(data)
 
