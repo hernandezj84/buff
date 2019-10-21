@@ -26,7 +26,7 @@ def test_jwt(request):
             post_data, settings.SECRET_KEY, algorithms=['HS256'])
         data["data"] = jwt_decoded
     except Exception as e:
-        data["error"] = str(e) + str(request.data)
+        data["error"] = str(e)
 
     return Response(data)
 
