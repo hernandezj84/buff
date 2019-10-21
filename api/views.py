@@ -18,7 +18,7 @@ def test(request):
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def test_jwt(request):
-    post_data = request.data["data"]
+    post_data = request.data
     jwt_decoded = jwt.decode(
         post_data, settings.SECRET_KEY, algorithms=['HS256'])
     return Response({"data": jwt_decoded})
