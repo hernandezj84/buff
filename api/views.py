@@ -4,12 +4,48 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from api.models import Workout
+from django.contrib.auth import authenticate
+from jose import jwt
+from django.conf import settings
 
 
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def test(request):
     return Response({"data": "hello world"})
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def test_jwt(request):
+    post_data = request.data["data"]
+    jwt_decoded = jwt_decode(
+        post_data, settings.SECRET_KEY, algorithms=['HS256'])
+    return Response({"data": jwt_decoded})
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny),)
+def login(request):
+    data = {}
+    try:
+        post_data = request.data["data"]
+        jwt_decoded = jwt.decode(
+            post_data, settings.SECRET_KEY, algorithms=['HS256'])
+        user = User.object.filter(username=jwt_decoded["email"])
+        if len(user) == 0:
+            # Email does not exists
+            user = User.objects.create_user(
+                jwt_decoded["email"], jwt_decoded["email"], jwt_decoded["password"])
+
+        else:
+            user = user[0]
+        token = Token.objects.get_or_create(user=user)
+        data["token"] = token[0].key
+
+    except:
+        data["error"] = "User not found"
+    return Response(data)
 
 
 @api_view(['GET'])
