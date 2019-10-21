@@ -39,7 +39,7 @@ def login(request):
         post_data = request.data["data"]
         jwt_decoded = jwt.decode(
             post_data, settings.SECRET_KEY, algorithms=['HS256'])
-        user = User.object.filter(username=jwt_decoded["data"]["email"])
+        user = User.objects.filter(username=jwt_decoded["data"]["email"])
         if len(user) == 0:
             # Email does not exists
             user = User.objects.create_user(
