@@ -7,6 +7,7 @@ from api.models import Workout
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
+import json
 
 
 @api_view(['GET'])
@@ -20,7 +21,7 @@ def test(request):
 def test_jwt(request):
     post_data = request.data
     jwt_decoded = jwt.decode(
-        post_data, settings.SECRET_KEY, algorithms=['HS256'])
+        json.dumps(post_data), settings.SECRET_KEY, algorithms=['HS256'])
     return Response({"data": jwt_decoded})
 
 
