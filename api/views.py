@@ -32,7 +32,7 @@ def test_jwt(request):
 
 
 @api_view(['POST'])
-@permission_classes((AllowAny),)
+@permission_classes((AllowAny,))
 def login(request):
     data = {}
     try:
