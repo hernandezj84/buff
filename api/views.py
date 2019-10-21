@@ -47,8 +47,11 @@ def login(request):
 
         else:
             user = user[0]
-        token = Token.objects.get_or_create(user=user)
-        data["token"] = token[0].key
+            if authenticate(username=user.username, password=jwt_decoded["password"]):
+                token = Token.objects.get_or_create(user=user)
+                data["token"] = token[0].key
+            else:
+                data["error"] = "Email / password invalid"
 
     except:
         data["error"] = "User not found"
