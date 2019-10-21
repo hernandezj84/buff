@@ -53,8 +53,8 @@ def login(request):
             else:
                 data["error"] = "Email / password invalid"
 
-    except:
-        data["error"] = "User not found"
+    except Exception as e:
+        data["error"] = "User not found {}".format(str(e))
     return Response(data)
 
 
