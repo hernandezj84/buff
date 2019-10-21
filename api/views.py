@@ -21,7 +21,7 @@ def test(request):
 def test_jwt(request):
     data = {}
     try:
-        post_data = request.data
+        post_data = request.data["data"]
         jwt_decoded = jwt.decode(
             post_data, settings.SECRET_KEY, algorithms=['HS256'])
         data["data"] = jwt_decoded
