@@ -13,7 +13,13 @@ import json
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def test(request):
-    return Response({"data": "hello world"})
+    data = {}
+    try:
+        post_data = request.data["data"]
+        jwt_decoded = jwt.decode(
+            post_data. settings.SECRET_KEY, algorithms=['HS256'])
+        data["response"] = jwt_decoded
+    except Exception as e:
 
 
 @api_view(['POST'])
