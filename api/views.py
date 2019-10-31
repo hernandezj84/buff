@@ -10,10 +10,18 @@ from django.conf import settings
 import json
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes((AllowAny,))
 def test(request):
-    return Response({"data": "hello world"})
+    data = {}
+    try:
+        post_data = request.data["data"]
+        jwt_decoded = jwt.decode(post_data, settings.SECRET_KEY, algorithms=['HS256'])
+        data["data"] = jwt_decoded
+    except Exception as e:
+        data["error"] = str(e) + post_data
+
+    return Response(data)
 
 
 @api_view(['POST'])
@@ -39,22 +47,24 @@ def login(request):
         post_data = request.data["data"]
         jwt_decoded = jwt.decode(
             post_data, settings.SECRET_KEY, algorithms=['HS256'])
-        user = User.objects.filter(username=jwt_decoded["data"]["email"])
+        user = User.objects.filter(username=jwt_decoded["email"])
         if len(user) == 0:
             # Email does not exists
             user = User.objects.create_user(
-                jwt_decoded["data"]["email"], jwt_decoded["data"]["email"], jwt_decoded["data"]["password"])
+                jwt_decoded["email"], jwt_decoded["email"], jwt_decoded["password"])
+            token = Token.objects.get_or_create(user=user)
+            data["token"] = token[0].key
 
         else:
             user = user[0]
-            if authenticate(username=user.username, password=jwt_decoded["data"]["password"]):
+            if authenticate(username=user.username, password=jwt_decoded["password"]):
                 token = Token.objects.get_or_create(user=user)
                 data["token"] = token[0].key
             else:
                 data["error"] = "Email / password invalid"
 
     except Exception as e:
-        data["error"] = "User not found {} {}".format(str(e), post_data)
+        data["error"] = "User not found {} {} {}".format(str(e))
     return Response(data)
 
 
