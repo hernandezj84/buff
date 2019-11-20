@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework.authtoken.models import Token
+from plusdi.models import Commerce
 
 
 class UserHelper(object):
@@ -15,7 +16,7 @@ class UserHelper(object):
         return token
 
     def create_commerce(self, email, password):
-        """Cretes commerce"""
+        """Creates commerce"""
         group = self.get_group("commerce")
         commerce = User()
         commerce.username = email
@@ -24,4 +25,6 @@ class UserHelper(object):
         commerce.save()
         group.user_set.add(commerce.id)
         token = self.get_token(commerce)
+        commerce_profile = Commerce(commerce=commerce)
+        commerce_profile.save()
         return token

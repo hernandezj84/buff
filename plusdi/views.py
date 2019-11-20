@@ -102,3 +102,18 @@ def login_commerce(request):
         data["error"] = "Error: {}".format(error)
 
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def update_commerce(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        user_helper = UserHelper()
+        post_data = jwt.decode_data(request.data["data"])
+        token = request.auth
+        user = Token.objects.get(key=token)
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
