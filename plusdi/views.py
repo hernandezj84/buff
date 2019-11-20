@@ -8,8 +8,8 @@ from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
 import json
-from jwt_helper import JwtHelper
-from user_helper import UserHelper
+from plusdi.jwt_helper import JwtHelper
+from plusdi.user_helper import UserHelper
 from django.db import IntegrityError
 
 # Create your views here.
