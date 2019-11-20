@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User, Group
-from plusdi.models import Discount
+from plusdi.models import Discount, Commerce
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
@@ -113,11 +113,11 @@ def update_commerce(request):
         post_data = jwt.decode_data(request.data["data"])
         token = request.auth
         user = Token.objects.get(key=token)
-        commerce = Commerce.objects.get(commerce=user)
+        commerce = Commerce.objects.get(commerce=user.user)
         commerce.company = post_data["company"]
         commerce.phone = post_data["phone"]
         commerce.save()
-        data["update"] = "Commerce {} updated!".format(user.email)
+        data["update"] = "Commerce {} updated!".format(user.user.email)
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
