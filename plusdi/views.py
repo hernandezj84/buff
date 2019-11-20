@@ -72,7 +72,7 @@ def create_commerce(request):
     data = {}
     try:
         jwt = JwtHelper()
-        post_data = jwt.decode_data(request["data"])
+        post_data = jwt.decode_data(request.data)
         user_helper = UserHelper()
         commerce = user_helper.create_commerce(
             post_data["email"], post_data["password"])
