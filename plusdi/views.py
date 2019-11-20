@@ -82,3 +82,21 @@ def create_commerce(request):
     except Exception as error:
         data["error"] = "Error {}".format(str(error))
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny))
+def login_commerce(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        user_helper = UserHelper()
+        post_data = jwt.decode_data(request.data["data"])
+        if authenticate(username=post_data["email"], password=post_data["password"]):
+            commerce = User.objects.get(username=post_data["email"])
+            data["data"] = jwt.encode_data(
+                {"token": user_helper.get_token(commerce)[0].key})
+    except Exception as error:
+        data["error"] = "Error: {}".format(error)
+
+    return Response(data)

@@ -6,4 +6,5 @@ urlpatterns = [
     url('^plusdi/post-discount/$', views.post_discount),
     url('^plusdi/discount/$', views.get_discount),
     url('^plusdi/create-commerce/$', views.create_commerce),
+    url('^plusdi/login-commerce/$', views.login_commerce),
 ]
