@@ -85,7 +85,7 @@ def create_commerce(request):
 
 
 @api_view(['POST'])
-@permission_classes((AllowAny))
+@permission_classes((AllowAny,))
 def login_commerce(request):
     data = {}
     try:
@@ -96,6 +96,8 @@ def login_commerce(request):
             commerce = User.objects.get(username=post_data["email"])
             data["data"] = jwt.encode_data(
                 {"token": user_helper.get_token(commerce)[0].key})
+        else:
+            data["error"] = "User not found"
     except Exception as error:
         data["error"] = "Error: {}".format(error)
 
