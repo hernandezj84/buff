@@ -110,10 +110,15 @@ def update_commerce(request):
     data = {}
     try:
         jwt = JwtHelper()
-        user_helper = UserHelper()
         post_data = jwt.decode_data(request.data["data"])
         token = request.auth
         user = Token.objects.get(key=token)
+        commerce = Commerce.objects.get(commerce=user)
+        commerce.company = post_data["company"]
+        commerce.phone = post_data["phone"]
+        commerce.save()
+        data["update"] = "Commerce {} updated!".format(user.email)
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
+    return Response(data)
