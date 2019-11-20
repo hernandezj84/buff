@@ -22,6 +22,6 @@ class UserHelper(object):
         commerce.email = email
         commerce.set_password(password)
         commerce.save()
-        group.user_set.add(commerce)
-        token = self.get_token(email)
+        group.user_set.add(commerce.id)
+        token = self.get_token(commerce)
         return token

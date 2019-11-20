@@ -11,4 +11,4 @@ class JwtHelper(object):
 
     def encode_data(self, document):
         """Encode data for server """
-        return jwt.encode(document, settins.SECRET_KEY, algorithm="HS256")
+        return jwt.encode(document, settings.SECRET_KEY, algorithm="HS256")

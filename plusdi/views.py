@@ -72,11 +72,11 @@ def create_commerce(request):
     data = {}
     try:
         jwt = JwtHelper()
-        post_data = jwt.decode_data(request.data)
+        post_data = jwt.decode_data(request.data["data"])
         user_helper = UserHelper()
         commerce = user_helper.create_commerce(
             post_data["email"], post_data["password"])
-        data["data"] = commerce.key
+        data["data"] = jwt.encode_data({"token": commerce[0].key})
     except IntegrityError:
         data["error"] = "Error: User already registered"
     except Exception as error:
