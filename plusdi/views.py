@@ -81,3 +81,4 @@ def create_commerce(request):
         data["error"] = "Error: User already registered"
     except Exception as error:
         data["error"] = "Error {}".format(str(error))
+    return Response(data)
