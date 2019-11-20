@@ -9,3 +9,12 @@ class Discount(models.Model):
 
     def __str__(self):
         return self.user.email
+
+
+class Commerce(models.Model):
+    """Commerce model"""
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    phone = models.CharField(blank=True, max_length=100)
+
+    def __str__(self):
+        return self.owner.email

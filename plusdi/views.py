@@ -2,12 +2,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from plusdi.models import Discount
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
 import json
+from jwt_helper import JwtHelper
+from user_helper import UserHelper
+from django.db import IntegrityError
 
 # Create your views here.
 
@@ -61,3 +64,20 @@ def get_discount(request):
     except:
         data["error"] = "User not found"
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def create_commerce(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        post_data = jwt.decode_data(request["data"])
+        user_helper = UserHelper()
+        commerce = user_helper.create_commerce(
+            post_data["email"], post_data["password"])
+        data["data"] = commerce.key
+    except IntegrityError:
+        data["error"] = "Error: User already registered"
+    except Exception as error:
+        data["error"] = "Error {}".format(str(error))
