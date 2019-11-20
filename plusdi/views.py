@@ -111,14 +111,28 @@ def update_commerce(request):
     try:
         jwt = JwtHelper()
         post_data = jwt.decode_data(request.data["data"])
-        token = request.auth
-        user = Token.objects.get(key=token)
-        commerce = Commerce.objects.get(commerce=user.user)
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
         commerce.company = post_data["company"]
         commerce.phone = post_data["phone"]
         commerce.save()
-        data["update"] = "Commerce {} updated!".format(user.user.email)
+        data["update"] = "Commerce {} updated!".format(token.user.email)
 
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_commerce(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
+        data["data"] = jwt.encode_data(
+            {"company": commerce.company, "phone": commerce.phone})
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
