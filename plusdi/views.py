@@ -29,7 +29,7 @@ def test(request):
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-def post_discount(request):
+def post_discount_test(request):
     data = {}
     try:
         token = request.auth
@@ -133,6 +133,24 @@ def get_commerce(request):
         commerce = Commerce.objects.get(commerce=token.user)
         data["data"] = jwt.encode_data(
             {"company": commerce.company, "phone": commerce.phone})
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def post_discount(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
+        post_data = jwt.decode_data(request.data["data"])
+        new_discount = Discount(
+            user=commerce.user, discount=post_data["discount"])
+        new_discount.save()
+        data["data"] = jwt.encode_data({"id": new_discount.pk})
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
