@@ -154,3 +154,20 @@ def post_discount(request):
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_commerce_discount(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
+        discounts = Discount.objects.filter(user=commerce.commerce)
+        discounts_serializer = [x for x in discounts]
+        data["data"] = discounts_serializer
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
