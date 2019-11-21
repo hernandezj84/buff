@@ -165,8 +165,11 @@ def get_commerce_discount(request):
         token = Token.objects.get(key=request.auth)
         commerce = Commerce.objects.get(commerce=token.user)
         discounts = Discount.objects.filter(user=commerce.commerce)
-        discounts_serializer = [x for x in discounts]
-        data["data"] = discounts_serializer
+        discounts_list = []
+        for x in discounts:
+            x.discount["id"] = x.id
+            discounts_list.append(x.discount)
+        data["data"] = discounts_list
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
