@@ -193,10 +193,10 @@ def update_commerce_discount(request):
             year = post_data["discount"]["endDate"]["date"]["year"]
             month = post_data["discount"]["endDate"]["date"]["month"]
             day = post_data["discount"]["endDate"]["date"]["day"]
-            discount.expire_date = datetime.datetime(year, month, day)
+            discount.expire_date = datetime.datetime(year, month, day, 0, 0, 0)
 
         discount.save()
-        data["data"] = "Discount {} updated successfully {}".format(
+        data["data"] = "Discount {} updated successfully".format(
             discount.pk)
 
     except Exception as error:
