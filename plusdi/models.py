@@ -6,9 +6,10 @@ import jsonfield
 class Discount(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     discount = jsonfield.JSONField()
+    expire_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return self.user.email
+        return "{}-{}".format(self.user.email, self.id)
 
 
 class Commerce(models.Model):

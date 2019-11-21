@@ -148,7 +148,7 @@ def post_discount(request):
         commerce = Commerce.objects.get(commerce=token.user)
         post_data = jwt.decode_data(request.data["data"])
         new_discount = Discount(
-            user=commerce.user, discount=post_data["discount"])
+            user=commerce.commerce, discount=post_data["discount"])
         new_discount.save()
         data["data"] = jwt.encode_data({"id": new_discount.pk})
     except Exception as error:
