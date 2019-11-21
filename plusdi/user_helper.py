@@ -28,3 +28,14 @@ class UserHelper(object):
         commerce_profile = Commerce(commerce=commerce)
         commerce_profile.save()
         return token
+
+    def create_client(self, email, password):
+        """Creates client"""
+        group = self.get_group("client")
+        client = User()
+        client.username = email
+        client.set_password(password)
+        client.save()
+        group.user_set.add(client.id)
+        token = self.get_token(client)
+        return client

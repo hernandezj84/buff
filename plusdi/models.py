@@ -20,3 +20,11 @@ class Commerce(models.Model):
 
     def __str__(self):
         return self.commerce.email
+
+
+class Client(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    account = jsonfield.JSONField()
+
+    def __str__(self):
+        return self.user.email

@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User, Group
-from plusdi.models import Discount, Commerce
+from plusdi.models import Discount, Commerce, Client
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
@@ -199,6 +199,26 @@ def update_commerce_discount(request):
         data["data"] = "Discount {} updated successfully".format(
             discount.pk)
 
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def create_client(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        user_helper = UserHelper()
+        post_data = jwt.decode_data(request.data["data"])
+        data["server"] = post_data
+        client = user_helper.create_client(
+            post_data["email"], post_data["password"])
+        client_profile = Client(user=client)
+        client_profile.account = post_data
+        client_profile.save()
+        data["data"] = "Client {} successfully create".format(client.email)
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
