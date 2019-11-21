@@ -174,3 +174,23 @@ def get_commerce_discount(request):
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def update_commerce_discount(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
+        post_data = jwt.decode_data(request.data["data"])
+        discount = Discount.objects.get(
+            pk=post_data["id"], user=commerce.commerce)
+        discount.discount = post_data["discount"]
+        discount.save()
+        data["data"] = "Discount {} updated successfully".format(discount.pk)
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
