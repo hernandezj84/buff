@@ -11,6 +11,7 @@ import json
 from plusdi.jwt_helper import JwtHelper
 from plusdi.user_helper import UserHelper
 from django.db import IntegrityError
+import datetime
 
 # Create your views here.
 
@@ -188,8 +189,15 @@ def update_commerce_discount(request):
         discount = Discount.objects.get(
             pk=post_data["id"], user=commerce.commerce)
         discount.discount = post_data["discount"]
+        if 'endDate' in post_data["discount"]:
+            year = post_data["discount"]["endDate"]["date"]["year"]
+            month = post_data["discount"]["endDate"]["date"]["month"]
+            day = post_data["discount"]["endDate"]["date"]["day"]
+            discount.expire_date = datetime.datetime(year, month, day)
+
         discount.save()
-        data["data"] = "Discount {} updated successfully".format(discount.pk)
+        data["data"] = "Discount {} updated successfully {}".format(
+            discount.pk)
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
