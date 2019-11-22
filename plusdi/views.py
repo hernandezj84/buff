@@ -146,10 +146,7 @@ def post_discount(request):
     try:
         jwt = JwtHelper()
         token = Token.objects.get(key=request.auth)
-        commerce = Commerce.objects.get(commerce=token.user)except Exception as error:
-        data["error"] = "Error {}".format(error)
-    return Response(data)
-
+        commerce = Commerce.objects.get(commerce=token.user)
         post_data = jwt.decode_data(request.data["data"])
         new_discount = Discount(
             user=commerce.commerce, discount=post_data["discount"])
@@ -234,7 +231,7 @@ def update_client_categories(request):
         jwt = JwtHelper()
         new_client_category = ""
         token = Token.objects.get(key=request.auth)
-        client = Client.objects.get(user=token.user)
+        client = User.objects.get(username=token.user)
         post_data = jwt.decode_data(request.data["data"])
         client_category = ClientCategory.objects.filter(user=client)
         if len(client_category) == 0:
