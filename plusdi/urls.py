@@ -13,4 +13,5 @@ urlpatterns = [
     url('^plusdi/update-discount/$', views.update_commerce_discount),
     url('^plusdi/create-client', views.create_client),
     url('^plusdi/update-client-categories', views.update_client_categories)
+    url('^plusdi/get-client-discounts'm views.get_client_discounts),
 ]

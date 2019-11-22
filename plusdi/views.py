@@ -12,6 +12,7 @@ from plusdi.jwt_helper import JwtHelper
 from plusdi.user_helper import UserHelper
 from django.db import IntegrityError
 import datetime
+from django.db.models import Q
 
 # Create your views here.
 
@@ -236,15 +237,30 @@ def update_client_categories(request):
         client_category = ClientCategory.objects.filter(user=client)
         if len(client_category) == 0:
             new_client_category = ClientCategory(user=client)
-            
+
         else:
             new_client_category = client_category[0]
-        
+
         new_client_category.category = post_data["categories"]
         new_client_category.save()
-        
+
         data["data"] = "Client {} categories updated successfully".format(
             client.email)
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_client_discounts(request):
+    data = {}
+    try:
+        now = datetime.datetime.now()
+        client_discounts = Discount.objects.filter(
+            Q(expire_date__gt=now.date())).order_by('-date')
+        data["data"] = [x.discount for x in client_discounts]
+
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
