@@ -212,13 +212,12 @@ def create_client(request):
         jwt = JwtHelper()
         user_helper = UserHelper()
         post_data = jwt.decode_data(request.data["data"])
-        data["server"] = post_data
-        client = user_helper.create_client(
+        token, client = user_helper.create_client(
             post_data["email"], post_data["password"])
         client_profile = Client(user=client)
         client_profile.account = post_data
         client_profile.save()
-        data["data"] = "Client {} successfully create".format(client.email)
+        data["data"] = jwt.encode_data({"token": token[0].key})
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)

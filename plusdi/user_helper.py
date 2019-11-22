@@ -34,8 +34,9 @@ class UserHelper(object):
         group = self.get_group("client")
         client = User()
         client.username = email
+        client.email = email
         client.set_password(password)
         client.save()
         group.user_set.add(client.id)
         token = self.get_token(client)
-        return client
+        return token, client
