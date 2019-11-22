@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User, Group
-from plusdi.models import Discount, Commerce, Client
+from plusdi.models import Discount, Commerce, Client, ClientCategory
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
@@ -146,7 +146,10 @@ def post_discount(request):
     try:
         jwt = JwtHelper()
         token = Token.objects.get(key=request.auth)
-        commerce = Commerce.objects.get(commerce=token.user)
+        commerce = Commerce.objects.get(commerce=token.user)except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
         post_data = jwt.decode_data(request.data["data"])
         new_discount = Discount(
             user=commerce.commerce, discount=post_data["discount"])
@@ -218,6 +221,33 @@ def create_client(request):
         client_profile.account = post_data
         client_profile.save()
         data["data"] = jwt.encode_data({"token": token[0].key})
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def update_client_categories(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        new_client_category = ""
+        token = Token.objects.get(key=request.auth)
+        client = Client.objects.get(user=token.user)
+        post_data = jwt.decode_data(request.data["data"])
+        client_category = ClientCategory.objects.filter(user=client)
+        if len(client_category) == 0:
+            new_client_category = ClientCategory(user=client)
+            
+        else:
+            new_client_category = client_category[0]
+        
+        new_client_category.category = post_data["categories"]
+        new_client_category.save()
+        
+        data["data"] = "Client {} categories updated successfully".format(
+            client.email)
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)

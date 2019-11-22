@@ -23,8 +23,18 @@ class Commerce(models.Model):
 
 
 class Client(models.Model):
+    """Client account"""
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     account = jsonfield.JSONField()
+
+    def __str__(self):
+        return self.user.email
+
+
+class ClientCategory(models.Model):
+    """ Client Category"""
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    category = jsonfield.JSONField()
 
     def __str__(self):
         return self.user.email
