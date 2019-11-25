@@ -39,3 +39,13 @@ class ClientCategory(models.Model):
 
     def __str__(self):
         return self.user.email
+
+
+class MatchDocument(models.Model):
+    """Match document"""
+    commerce = models.ForeignKey(Commerce, on_delete=models.PROTECT)
+    client = models.ForeignKey(Client, on_delete=models.PROTECT)
+    discount = models.ForeignKey(Discount, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return "{}-{}-{}".format(self.commerce.company, self.client.user.email, self.discount.title)

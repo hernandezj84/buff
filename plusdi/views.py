@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User, Group
-from plusdi.models import Discount, Commerce, Client, ClientCategory
+from plusdi.models import Discount, Commerce, Client, ClientCategory, MatchDocument
 from django.contrib.auth import authenticate
 from jose import jwt
 from django.conf import settings
@@ -98,7 +98,8 @@ def login_commerce(request):
             commerce = User.objects.get(username=post_data["email"])
             commerce_account = Commerce.objects.get(commerce=commerce)
             if commerce.groups.filter(name="commerce").exists():
-                data["data"] = jwt.encode_data({"token": user_helper.get_token(commerce)[0].key, "email": commerce.email, "id": commerce.id, "company": commerce_account.company})
+                data["data"] = jwt.encode_data({"token": user_helper.get_token(commerce)[
+                                               0].key, "email": commerce.email, "id": commerce.id, "company": commerce_account.company})
             else:
                 data["error"] = "User not found"
         else:
@@ -107,7 +108,6 @@ def login_commerce(request):
         data["error"] = "Error: {}".format(error)
 
     return Response(data)
-
 
 
 @api_view(['POST'])
@@ -121,7 +121,8 @@ def login_user(request):
         if authenticate(username=post_data["email"], password=post_data["password"]):
             client = User.objects.get(username=post_data["email"])
             if client.groups.filter(name="client").exists():
-                data["data"] = jwt.encode_data({"token": user_helper.get_token(client)[0].key, "email": client.email, "id": client.id})
+                data["data"] = jwt.encode_data({"token": user_helper.get_token(
+                    client)[0].key, "email": client.email, "id": client.id})
             else:
                 data["error"] = "User not found"
         else:
@@ -130,6 +131,7 @@ def login_user(request):
         data["error"] = "Error: {}".format(error)
 
     return Response(data)
+
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -160,7 +162,7 @@ def get_commerce(request):
         token = Token.objects.get(key=request.auth)
         commerce = Commerce.objects.get(commerce=token.user)
         data["data"] = jwt.encode_data(
-                {"company": commerce.company, "phone": commerce.phone, "web": commerce.web})
+            {"company": commerce.company, "phone": commerce.phone, "web": commerce.web})
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
@@ -203,6 +205,7 @@ def get_commerce_discount(request):
         data["error"] = "Error {}".format(error)
     return Response(data)
 
+
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_commerce_valid_discount(request):
@@ -212,7 +215,8 @@ def get_commerce_valid_discount(request):
         now = datetime.datetime.now()
         token = Token.objects.get(key=request.auth)
         commerce = Commerce.objects.get(commerce=token.user)
-        discounts = Discount.objects.filter(Q(expire_date__gte=now.date()) & Q(user=commerce.commerce)).order_by('expire_date')
+        discounts = Discount.objects.filter(Q(expire_date__gte=now.date()) & Q(
+            user=commerce.commerce)).order_by('expire_date')
         discounts_list = []
         for x in discounts:
             x.discount["id"] = x.id
@@ -222,6 +226,7 @@ def get_commerce_valid_discount(request):
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
+
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -308,7 +313,50 @@ def get_client_discounts(request):
         data["commerce"] = []
         for x in client_discounts:
             commerce = Commerce.objects.get(commerce=x.user)
-            data["commerce"].append({"discountId": x.id, "company": commerce.company, "phone": commerce.phone, "web": commerce.web, "commerceId": x.user.id})
+            data["commerce"].append({"discountId": x.id, "company": commerce.company,
+                                     "phone": commerce.phone, "web": commerce.web, "commerceId": x.user.id})
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def post_match_discount(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        post_data = jwt.decode_data(request.data["data"])
+        commerce = User.objects.get(pk=post_data["commerceId"])
+        client = User.objects.get(pk=post_data["clientId"])
+        discount = Discount.objects.get(pk=post_data["discountId"])
+        match_document = MatchDocument(
+            commerce=commerce, client=client, discount=discount)
+        match_document.save()
+        data["data"] = "Match document update with sucess!"
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_client_match_document(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        client = User.objects.get(username=token.user)
+        match_documents = MatchDocument.objects.filter(client=client)
+        match_documents_list = [
+            {"commerceId": x.commerce.id,
+             "clientId": x.client.id,
+             "discountId": x.discount.id}
+            for x in match_documents]
+        data["data"] = match_documents_list
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
