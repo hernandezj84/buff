@@ -209,9 +209,10 @@ def get_commerce_valid_discount(request):
     data = {}
     try:
         jwt = JwtHelper()
+        now = datetime.datetime.now()
         token = Token.objects.get(key=request.auth)
         commerce = Commerce.objects.get(commerce=token.user)
-        discounts = Discount.objects.filter(Q(expire_date__gte=now.date()), & (user=commerce.commerce)).order_by('expire_date')
+        discounts = Discount.objects.filter(Q(expire_date__gte=now.date()) & Q(user=commerce.commerce)).order_by('expire_date')
         discounts_list = []
         for x in discounts:
             x.discount["id"] = x.id
