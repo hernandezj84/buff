@@ -307,6 +307,8 @@ def get_client_discounts(request):
     data = {}
     try:
         now = datetime.datetime.now()
+        token = Token.objects.get(key=request.auth)
+        client = User.objects.get(username=token.user)
         client_discounts = Discount.objects.filter(
             Q(expire_date__gte=now.date())).order_by('expire_date')
         data["data"] = [x.discount for x in client_discounts]
@@ -315,6 +317,13 @@ def get_client_discounts(request):
             commerce = Commerce.objects.get(commerce=x.user)
             data["commerce"].append({"discountId": x.id, "company": commerce.company,
                                      "phone": commerce.phone, "web": commerce.web, "commerceId": x.user.id})
+        match_documents = MatchDocument.objects.filter(client=client)
+        match_documents_list = [
+            {"commerceId": x.commerce.id,
+             "clientId": x.client.id,
+             "discountId": x.discount.id}
+            for x in match_documents]
+        data["match_documents"] = match_documents_list
 
     except Exception as error:
         data["error"] = "Error {}".format(error)

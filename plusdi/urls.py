@@ -16,6 +16,6 @@ urlpatterns = [
     url('^plusdi/update-client-categories', views.update_client_categories),
     url('^plusdi/get-client-discounts', views.get_client_discounts),
     url('^plusdi/get-valid-discounts', views.get_commerce_valid_discount),
-    url('^plusdi/get-client-match-documents', views.get_client_match_discounts),
-    url('^plusdi/post-match-document', views.post_match_document),
+    url('^plusdi/get-client-match-documents', views.get_client_match_document),
+    url('^plusdi/post-match-document', views.post_match_discount),
 ]
