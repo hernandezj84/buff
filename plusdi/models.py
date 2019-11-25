@@ -17,6 +17,7 @@ class Commerce(models.Model):
     commerce = models.ForeignKey(User, on_delete=models.PROTECT)
     company = models.CharField(blank=True, max_length=100)
     phone = models.CharField(blank=True, max_length=100)
+    web = models.CharField(blank=True, max_length=100)
 
     def __str__(self):
         return self.commerce.email

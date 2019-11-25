@@ -96,8 +96,11 @@ def login_commerce(request):
         post_data = jwt.decode_data(request.data["data"])
         if authenticate(username=post_data["email"], password=post_data["password"]):
             commerce = User.objects.get(username=post_data["email"])
-            data["data"] = jwt.encode_data(
-                {"token": user_helper.get_token(commerce)[0].key})
+            commerce_account = Commerce.objects.get(commerce=commerce)
+            if commerce.groups.filter(name="commerce").exists():
+                data["data"] = jwt.encode_data({"token": user_helper.get_token(commerce)[0].key, "email": commerce.email, "id": commerce.id, "company": commerce_account.company})
+            else:
+                data["error"] = "User not found"
         else:
             data["error"] = "User not found"
     except Exception as error:
@@ -105,6 +108,28 @@ def login_commerce(request):
 
     return Response(data)
 
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def login_user(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        user_helper = UserHelper()
+        post_data = jwt.decode_data(request.data["data"])
+        if authenticate(username=post_data["email"], password=post_data["password"]):
+            client = User.objects.get(username=post_data["email"])
+            if client.groups.filter(name="client").exists():
+                data["data"] = jwt.encode_data({"token": user_helper.get_token(client)[0].key, "email": client.email, "id": client.id})
+            else:
+                data["error"] = "User not found"
+        else:
+            data["error"] = "User not found"
+    except Exception as error:
+        data["error"] = "Error: {}".format(error)
+
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -117,6 +142,7 @@ def update_commerce(request):
         commerce = Commerce.objects.get(commerce=token.user)
         commerce.company = post_data["company"]
         commerce.phone = post_data["phone"]
+        commerce.web = post_data["web"]
         commerce.save()
         data["update"] = "Commerce {} updated!".format(token.user.email)
 
@@ -134,7 +160,7 @@ def get_commerce(request):
         token = Token.objects.get(key=request.auth)
         commerce = Commerce.objects.get(commerce=token.user)
         data["data"] = jwt.encode_data(
-            {"company": commerce.company, "phone": commerce.phone})
+                {"company": commerce.company, "phone": commerce.phone, "web": commerce.web})
     except Exception as error:
         data["error"] = "Error {}".format(error)
     return Response(data)
@@ -177,6 +203,24 @@ def get_commerce_discount(request):
         data["error"] = "Error {}".format(error)
     return Response(data)
 
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_commerce_valid_discount(request):
+    data = {}
+    try:
+        jwt = JwtHelper()
+        token = Token.objects.get(key=request.auth)
+        commerce = Commerce.objects.get(commerce=token.user)
+        discounts = Discount.objects.filter(Q(expire_date__gte=now.date()), & (user=commerce.commerce)).order_by('expire_date')
+        discounts_list = []
+        for x in discounts:
+            x.discount["id"] = x.id
+            discounts_list.append(x.discount)
+        data["data"] = discounts_list
+
+    except Exception as error:
+        data["error"] = "Error {}".format(error)
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
@@ -258,8 +302,12 @@ def get_client_discounts(request):
     try:
         now = datetime.datetime.now()
         client_discounts = Discount.objects.filter(
-            Q(expire_date__gt=now.date())).order_by('-date')
+            Q(expire_date__gte=now.date())).order_by('expire_date')
         data["data"] = [x.discount for x in client_discounts]
+        data["commerce"] = []
+        for x in client_discounts:
+            commerce = Commerce.objects.get(commerce=x.user)
+            data["commerce"].append({"discountId": x.id, "company": commerce.company, "phone": commerce.phone, "web": commerce.web, "commerceId": x.user.id})
 
     except Exception as error:
         data["error"] = "Error {}".format(error)
