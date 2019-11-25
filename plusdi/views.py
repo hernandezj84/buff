@@ -308,7 +308,9 @@ def get_client_discounts(request):
     try:
         now = datetime.datetime.now()
         token = Token.objects.get(key=request.auth)
-        client = User.objects.get(username=token.user)
+        user = User.objects.get(username=token.user)
+        client = Client.objects.get(user=user)
+        data["cachapa"] = str(client.id)
         client_discounts = Discount.objects.filter(
             Q(expire_date__gte=now.date())).order_by('expire_date')
         data["data"] = [x.discount for x in client_discounts]
@@ -319,8 +321,8 @@ def get_client_discounts(request):
                                      "phone": commerce.phone, "web": commerce.web, "commerceId": x.user.id})
         match_documents = MatchDocument.objects.filter(client=client)
         match_documents_list = [
-            {"commerceId": x.commerce.id,
-             "clientId": x.client.id,
+            {"commerceId": x.commerce.commerce.id,
+             "clientId": x.client.user.id,
              "discountId": x.discount.id}
             for x in match_documents]
         data["match_documents"] = match_documents_list
@@ -338,9 +340,11 @@ def post_match_discount(request):
         jwt = JwtHelper()
         token = Token.objects.get(key=request.auth)
         post_data = jwt.decode_data(request.data["data"])
-        commerce = User.objects.get(pk=post_data["commerceId"])
-        client = User.objects.get(pk=post_data["clientId"])
+        commerce_user = User.objects.get(pk=post_data["commerceId"])
+        client_user = User.objects.get(pk=post_data["clientId"])
         discount = Discount.objects.get(pk=post_data["discountId"])
+        commerce = Commerce.objects.get(commerce=commerce_user)
+        client = Client.objects.get(user=client_user)
         match_document = MatchDocument(
             commerce=commerce, client=client, discount=discount)
         match_document.save()
