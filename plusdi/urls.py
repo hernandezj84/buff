@@ -18,4 +18,5 @@ urlpatterns = [
     url('^plusdi/get-valid-discounts', views.get_commerce_valid_discount),
     url('^plusdi/get-client-match-documents', views.get_client_match_document),
     url('^plusdi/post-match-document', views.post_match_discount),
+    url('^plusdi/commerce', views.backend),
 ]
