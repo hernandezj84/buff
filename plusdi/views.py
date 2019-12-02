@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
+from django.shortcuts import HttpResponse
 from django.contrib.auth.models import User, Group
 from plusdi.models import Discount, Commerce, Client, ClientCategory, MatchDocument
 from django.contrib.auth import authenticate
@@ -13,6 +14,7 @@ from plusdi.user_helper import UserHelper
 from django.db import IntegrityError
 import datetime
 from django.db.models import Q
+from django.template import loader
 
 # Create your views here.
 
@@ -27,6 +29,12 @@ def test(request):
         data["error"] = str(e)
 
     return Response(data)
+
+@permission_classes((AllowAny,))
+def backend(request):
+    context = {}
+    template = loader.get_template('plusdiweb/index.html')
+    return HttpResponse(template.render(context, request))
 
 
 @api_view(['POST'])
